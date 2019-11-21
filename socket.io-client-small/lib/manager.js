@@ -133,7 +133,7 @@ Manager.prototype.onopen = function () {
   this.subs.push(on(this.decoder, 'decoded', bind(this, 'ondecoded')));
 };
 Manager.prototype.onping = function () {
-  debug('listen ping:', this.emitAll)
+  debug('listen ping:')
   this.lastPing = new Date();
   this.emitAll('ping');
 };

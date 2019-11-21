@@ -87,7 +87,7 @@ Socket.prototype.onopen = function () {
 };
 
 Socket.prototype.packet = function (packet) {
-  debug('packet:', packet, this.io.packet)
+  debug('packet:', packet)
   packet.nsp = this.nsp;
   this.io.packet(packet);
 };

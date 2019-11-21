@@ -5,8 +5,7 @@ s = require('../socket.io-client-small/lib/index');
 const Emitter = require('component-emitter');
 const inherit = require('component-inherit');
 
-let socket = s('https://node.voibook.com/login?token=07fb1f8b-96b6-4866-9d50-993ac0535475&client=mobile', {skipReconnect: true});
-// let socket = s('http://localhost:2000');
+let socket = s('http://localhost:2000');
 socket.on('auth', (data) => {
   console.log('auth:', data)
   socket.on('add', (data) => {
@@ -41,5 +40,3 @@ socket.on('data', (data) => {
 socket.on('error', (data) => {
   console.log('error:::::', data)
 })
-
-// console.log(`\n\n-----------------------------------------------------------------------------------------\n\n`)
