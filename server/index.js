@@ -4,21 +4,12 @@ const http = require('http');
 const server = http.createServer(app);
 const io = require('socket.io')(server);
 
-// io.of('/test/').on('connection', (socket) => {
-//   console.log('socket in:', socket.id);
-
-//   io.emit('auth', 'hello websocket');
-
-//   socket.on('test', (data) => {
-//     console.log('test', data);
-//     socket.emit('test', {code: 0})
-//   })
-// })/
 // io.set('heartbeat interval', 5000)
-io.on('connection', (socket) => {
+io.of('/test').on('connection', (socket) => {
+  console.log('handshake: %o', socket.handshake)
   console.log('socket in:', socket.id);
 
-  io.emit('auth', {code: 0, data: 'welcome socket.io'});
+  socket.emit('auth', {code: 0, data: 'welcome socket.io'});
 
   socket.on('add', (data) => {
     console.log('add', data);

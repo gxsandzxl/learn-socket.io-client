@@ -81,6 +81,7 @@ Socket.prototype.onopen = function () {
       debug('sending connect packet with query %s', query);
       this.packet({type: parser.CONNECT, query: query});
     } else {
+      debug('sending connect packet with no query');
       this.packet({type: parser.CONNECT});
     }
   }

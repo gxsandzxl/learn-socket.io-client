@@ -1,6 +1,7 @@
 const debug = require('debug')('socket.io-client-small:manager');
 const Emitter = require('component-emitter');
-const eio = require('engine.io-client');
+const eio = require('../../engine.io-client-small/index.js');
+// const eio = require('engine.io-client');
 const Socket = require('./socket');
 const on = require('./on');
 const bind = require('component-bind');
@@ -57,6 +58,7 @@ Manager.prototype.connect = function (fn) {
   if (~this.readyState.indexOf('open')) return this;
   
   this.engine = eio(this.uri, this.opts);
+  debug('init engine over')
   var socket = this.engine;
   var self = this;
   this.readyState = 'opening';
@@ -193,7 +195,7 @@ Manager.prototype.reconnect = function () {
 
       self.open(function (err) {
         if (err) {
-          debug('reconnect attempt error');
+          debug('reconnect attempt error, error: %s', err);
           self.reconnecting = false;
           self.reconnect();
           self.emitAll('reconnect_error', err.data);
@@ -250,7 +252,8 @@ Manager.prototype.socket = function (nsp, opts) {
       self.connecting.push(socket);
     }
   }
-  debug('socket init success')
+  debug('socket init success');
+  debug('sysnc handle over, start next async handle');
   return socket;
 };
 

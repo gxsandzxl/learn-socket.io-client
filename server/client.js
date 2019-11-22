@@ -4,14 +4,18 @@ let s = require('socket.io-client');
 s = require('../socket.io-client-small/lib/index');
 const Emitter = require('component-emitter');
 const inherit = require('component-inherit');
-
-let socket = s('http://localhost:2000');
+let socket = s('http://localhost:2000/test', {upgrade: false});
 socket.on('auth', (data) => {
   console.log('auth:', data)
   socket.on('add', (data) => {
     console.log('socket add:', data);
-    setTimeout(()=>{
+    setInterval(()=>{
       // socket.close()
+      
+      socket.emit(Math.random().toString())
+    }, 11000)
+    setTimeout(() => {
+      // socket.close();
     }, 11000)
   })
   socket.on('close', (data) => {
@@ -39,4 +43,10 @@ socket.on('data', (data) => {
 })
 socket.on('error', (data) => {
   console.log('error:::::', data)
+})
+socket.on('close', (data) => {
+  console.log('close:::::', data)
+})
+socket.on('disconnect', (data) => {
+  console.log('disconnect:::::', data)
 })

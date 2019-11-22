@@ -1,38 +1,17 @@
-/* global attachEvent */
-
-/**
- * Module requirements.
- */
-
 var XMLHttpRequest = require('xmlhttprequest-ssl');
 var Polling = require('./polling');
 var Emitter = require('component-emitter');
 var inherit = require('component-inherit');
-var debug = require('debug')('engine.io-client:polling-xhr');
-
-/**
- * Module exports.
- */
+var debug = require('debug')('engine.io-client-small:polling-xhr');
 
 module.exports = XHR;
 module.exports.Request = Request;
 
-/**
- * Empty function
- */
-
 function empty () {}
-
-/**
- * XHR Polling constructor.
- *
- * @param {Object} opts
- * @api public
- */
 
 function XHR (opts) {
   Polling.call(this, opts);
-  this.requestTimeout = opts.requestTimeout;
+  // this.requestTimeout = opts.requestTimeout;
   this.extraHeaders = opts.extraHeaders;
 
   if (typeof location !== 'undefined') {
@@ -50,24 +29,20 @@ function XHR (opts) {
   }
 }
 
-/**
- * Inherits from Polling.
- */
-
 inherit(XHR, Polling);
 
-/**
- * XHR supports binary
- */
-
-XHR.prototype.supportsBinary = true;
-
-/**
- * Creates a request.
- *
- * @param {String} method
- * @api private
- */
+XHR.prototype.doPoll = function () {
+  debug('xhr poll');
+  var req = this.request();
+  var self = this;
+  req.on('data', function (data) {
+    self.onData(data);
+  });
+  req.on('error', function (err) {
+    self.onError('xhr poll error', err);
+  });
+  this.pollXhr = req;
+};
 
 XHR.prototype.request = function (opts) {
   opts = opts || {};
@@ -76,7 +51,6 @@ XHR.prototype.request = function (opts) {
   opts.xs = this.xs;
   opts.agent = this.agent || false;
   opts.supportsBinary = this.supportsBinary;
-  opts.enablesXDR = this.enablesXDR;
   opts.withCredentials = this.withCredentials;
 
   // SSL options for Node.js client
@@ -95,14 +69,6 @@ XHR.prototype.request = function (opts) {
   return new Request(opts);
 };
 
-/**
- * Sends data.
- *
- * @param {String} data to send.
- * @param {Function} called upon flush.
- * @api private
- */
-
 XHR.prototype.doWrite = function (data, fn) {
   var isBinary = typeof data !== 'string' && data !== undefined;
   var req = this.request({ method: 'POST', data: data, isBinary: isBinary });
@@ -115,30 +81,7 @@ XHR.prototype.doWrite = function (data, fn) {
 };
 
 /**
- * Starts a poll cycle.
- *
- * @api private
- */
-
-XHR.prototype.doPoll = function () {
-  debug('xhr poll');
-  var req = this.request();
-  var self = this;
-  req.on('data', function (data) {
-    debug('doPoll receive data: %s', data);
-    self.onData(data);
-  });
-  req.on('error', function (err) {
-    self.onError('xhr poll error', err);
-  });
-  this.pollXhr = req;
-};
-
-/**
- * Request constructor
- *
- * @param {Object} options
- * @api public
+ * Request
  */
 
 function Request (opts) {
@@ -151,7 +94,6 @@ function Request (opts) {
   this.agent = opts.agent;
   this.isBinary = opts.isBinary;
   this.supportsBinary = opts.supportsBinary;
-  this.enablesXDR = opts.enablesXDR;
   this.withCredentials = opts.withCredentials;
   this.requestTimeout = opts.requestTimeout;
 
@@ -170,20 +112,12 @@ function Request (opts) {
   this.create();
 }
 
-/**
- * Mix in `Emitter`.
- */
-
+Request.requestsCount = 0;
+Request.requests = {};
 Emitter(Request.prototype);
 
-/**
- * Creates the XHR object and sends the request.
- *
- * @api private
- */
-
 Request.prototype.create = function () {
-  var opts = { agent: this.agent, xdomain: this.xd, xscheme: this.xs, enablesXDR: this.enablesXDR };
+  var opts = { agent: this.agent, xdomain: this.xd, xscheme: this.xs };
 
   // SSL options for Node.js client
   opts.pfx = this.pfx;
@@ -234,35 +168,26 @@ Request.prototype.create = function () {
       xhr.timeout = this.requestTimeout;
     }
 
-    if (this.hasXDR()) {
-      xhr.onload = function () {
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === 2) {
+        try {
+          var contentType = xhr.getResponseHeader('Content-Type');
+          if (self.supportsBinary && contentType === 'application/octet-stream' || contentType === 'application/octet-stream; charset=UTF-8') {
+            xhr.responseType = 'arraybuffer';
+          }
+        } catch (e) {}
+      }
+      if (4 !== xhr.readyState) return;
+      if (200 === xhr.status || 1223 === xhr.status) {
         self.onLoad();
-      };
-      xhr.onerror = function () {
-        self.onError(xhr.responseText);
-      };
-    } else {
-      xhr.onreadystatechange = function () {
-        if (xhr.readyState === 2) {
-          try {
-            var contentType = xhr.getResponseHeader('Content-Type');
-            if (self.supportsBinary && contentType === 'application/octet-stream' || contentType === 'application/octet-stream; charset=UTF-8') {
-              xhr.responseType = 'arraybuffer';
-            }
-          } catch (e) {}
-        }
-        if (4 !== xhr.readyState) return;
-        if (200 === xhr.status || 1223 === xhr.status) {
-          self.onLoad();
-        } else {
-          // make sure the `error` event handler that's user-set
-          // does not throw in the same tick and gets caught here
-          setTimeout(function () {
-            self.onError(typeof xhr.status === 'number' ? xhr.status : 0);
-          }, 0);
-        }
-      };
-    }
+      } else {
+        // make sure the `error` event handler that's user-set
+        // does not throw in the same tick and gets caught here
+        setTimeout(function () {
+          self.onError(typeof xhr.status === 'number' ? xhr.status : 0);
+        }, 0);
+      }
+    };
 
     debug('xhr data %s', this.data);
     xhr.send(this.data);
@@ -281,56 +206,18 @@ Request.prototype.create = function () {
     Request.requests[this.index] = this;
   }
 };
-
-/**
- * Called upon successful response.
- *
- * @api private
- */
-
-Request.prototype.onSuccess = function () {
-  this.emit('success');
-  this.cleanup();
-};
-
-/**
- * Called if we have data.
- *
- * @api private
- */
-
-Request.prototype.onData = function (data) {
-  this.emit('data', data);
-  this.onSuccess();
-};
-
-/**
- * Called upon error.
- *
- * @api private
- */
-
 Request.prototype.onError = function (err) {
+  debug('request error: %o', err);
   this.emit('error', err);
   this.cleanup(true);
 };
-
-/**
- * Cleans up house.
- *
- * @api private
- */
-
 Request.prototype.cleanup = function (fromError) {
   if ('undefined' === typeof this.xhr || null === this.xhr) {
     return;
   }
-  // xmlhttprequest
-  if (this.hasXDR()) {
-    this.xhr.onload = this.xhr.onerror = empty;
-  } else {
-    this.xhr.onreadystatechange = empty;
-  }
+  
+  this.xhr.onreadystatechange = empty;
+
 
   if (fromError) {
     try {
@@ -344,13 +231,6 @@ Request.prototype.cleanup = function (fromError) {
 
   this.xhr = null;
 };
-
-/**
- * Called upon load.
- *
- * @api private
- */
-
 Request.prototype.onLoad = function () {
   var data;
   try {
@@ -370,49 +250,11 @@ Request.prototype.onLoad = function () {
     this.onData(data);
   }
 };
-
-/**
- * Check if it has XDomainRequest.
- *
- * @api private
- */
-
-Request.prototype.hasXDR = function () {
-  return typeof XDomainRequest !== 'undefined' && !this.xs && this.enablesXDR;
+Request.prototype.onData = function (data) {
+  this.emit('data', data);
+  this.onSuccess();
 };
-
-/**
- * Aborts the request.
- *
- * @api public
- */
-
-Request.prototype.abort = function () {
+Request.prototype.onSuccess = function () {
+  this.emit('success');
   this.cleanup();
 };
-
-/**
- * Aborts pending requests when unloading the window. This is needed to prevent
- * memory leaks (e.g. when using IE) and to ensure that no spurious error is
- * emitted.
- */
-
-Request.requestsCount = 0;
-Request.requests = {};
-
-if (typeof document !== 'undefined') {
-  if (typeof attachEvent === 'function') {
-    attachEvent('onunload', unloadHandler);
-  } else if (typeof addEventListener === 'function') {
-    var terminationEvent = 'onpagehide' in self ? 'pagehide' : 'unload';
-    addEventListener(terminationEvent, unloadHandler, false);
-  }
-}
-
-function unloadHandler () {
-  for (var i in Request.requests) {
-    if (Request.requests.hasOwnProperty(i)) {
-      Request.requests[i].abort();
-    }
-  }
-}

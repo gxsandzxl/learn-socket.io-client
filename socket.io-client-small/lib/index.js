@@ -25,5 +25,5 @@ function lookup (uri, opts) {
   if (parsed.query && !opts.query) {
     opts.query = parsed.query;
   }
-  return io.socket(parsed.path, opts)
+  return io.socket(parsed.path, opts);
 }

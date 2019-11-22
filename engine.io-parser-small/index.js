@@ -6,6 +6,7 @@ var utf8 = require('./utf8');
 var hasBinary = require('has-binary2');
 var after = require('after');
 var keys = require('./keys');
+const debug = require('debug')('engine.io-parser-small')
 
 /**
  * Current protocol version.
@@ -117,7 +118,7 @@ exports.encodeBase64Packet = function(packet, callback){
  */
 
 exports.decodePacket = function (data, binaryType, utf8decode) {
-  console.log('data',data)
+  debug('decodePacket data: %s', data);
   if (data === undefined) {
     return err;
   }
@@ -139,6 +140,7 @@ exports.decodePacket = function (data, binaryType, utf8decode) {
         return err;
       }
     }
+    debug('decodePacket type: %s', type);
 
     if (Number(type) != type || !packetslist[type]) {
       return err;
