@@ -12,7 +12,7 @@ function empty () {}
 function XHR (opts) {
   Polling.call(this, opts);
   // this.requestTimeout = opts.requestTimeout;
-  this.extraHeaders = opts.extraHeaders;
+  // this.extraHeaders = opts.extraHeaders;
 
   if (typeof location !== 'undefined') {
     var isSSL = 'https:' === location.protocol;
@@ -47,24 +47,24 @@ XHR.prototype.doPoll = function () {
 XHR.prototype.request = function (opts) {
   opts = opts || {};
   opts.uri = this.uri();
-  opts.xd = this.xd;
-  opts.xs = this.xs;
-  opts.agent = this.agent || false;
-  opts.supportsBinary = this.supportsBinary;
-  opts.withCredentials = this.withCredentials;
+  // opts.xd = this.xd;
+  // opts.xs = this.xs;
+  // opts.agent = this.agent || false;
+  // opts.supportsBinary = this.supportsBinary;
+  // opts.withCredentials = this.withCredentials;
 
   // SSL options for Node.js client
-  opts.pfx = this.pfx;
-  opts.key = this.key;
-  opts.passphrase = this.passphrase;
-  opts.cert = this.cert;
-  opts.ca = this.ca;
-  opts.ciphers = this.ciphers;
-  opts.rejectUnauthorized = this.rejectUnauthorized;
-  opts.requestTimeout = this.requestTimeout;
+  // opts.pfx = this.pfx;
+  // opts.key = this.key;
+  // opts.passphrase = this.passphrase;
+  // opts.cert = this.cert;
+  // opts.ca = this.ca;
+  // opts.ciphers = this.ciphers;
+  // opts.rejectUnauthorized = this.rejectUnauthorized;
+  // opts.requestTimeout = this.requestTimeout;
 
   // other options for Node.js client
-  opts.extraHeaders = this.extraHeaders;
+  // opts.extraHeaders = this.extraHeaders;
 
   return new Request(opts);
 };
@@ -107,7 +107,7 @@ function Request (opts) {
   this.rejectUnauthorized = opts.rejectUnauthorized;
 
   // other options for Node.js client
-  this.extraHeaders = opts.extraHeaders;
+  // this.extraHeaders = opts.extraHeaders;
 
   this.create();
 }
@@ -134,16 +134,16 @@ Request.prototype.create = function () {
   try {
     debug('xhr open %s: %s', this.method, this.uri);
     xhr.open(this.method, this.uri, this.async);
-    try {
-      if (this.extraHeaders) {
-        xhr.setDisableHeaderCheck && xhr.setDisableHeaderCheck(true);
-        for (var i in this.extraHeaders) {
-          if (this.extraHeaders.hasOwnProperty(i)) {
-            xhr.setRequestHeader(i, this.extraHeaders[i]);
-          }
-        }
-      }
-    } catch (e) {}
+    // try {
+    //   if (this.extraHeaders) {
+    //     xhr.setDisableHeaderCheck && xhr.setDisableHeaderCheck(true);
+    //     for (var i in this.extraHeaders) {
+    //       if (this.extraHeaders.hasOwnProperty(i)) {
+    //         xhr.setRequestHeader(i, this.extraHeaders[i]);
+    //       }
+    //     }
+    //   }
+    // } catch (e) {}
 
     if ('POST' === this.method) {
       try {

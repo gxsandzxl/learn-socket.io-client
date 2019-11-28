@@ -37,7 +37,7 @@ function Socket (uri, opts) {
   }
 
   // 一大堆东西，先注释，根据需要在开放
-  // this.agent = opts.agent || false;
+  this.agent = opts.agent || false;
   this.hostname = opts.hostname ||
     (typeof location !== 'undefined' ? location.hostname : 'localhost');
   this.port = opts.port || (typeof location !== 'undefined' && location.port
@@ -52,13 +52,13 @@ function Socket (uri, opts) {
   this.timestampParam = opts.timestampParam || 't';
   this.timestampRequests = opts.timestampRequests;
   this.transports = opts.transports || ['polling', 'websocket'];
-  this.transportOptions = opts.transportOptions || {};
+  // this.transportOptions = opts.transportOptions || {};
   this.readyState = '';
   this.writeBuffer = [];
   this.prevBufferLen = 0;
   // this.policyPort = opts.policyPort || 843;
   this.rememberUpgrade = opts.rememberUpgrade || false;
-  this.binaryType = null;
+  // this.binaryType = null;
   // this.onlyBinaryUpgrades = opts.onlyBinaryUpgrades;
   // this.perMessageDeflate = false !== opts.perMessageDeflate ? (opts.perMessageDeflate || {}) : false;
 
@@ -141,7 +141,8 @@ Socket.prototype.createTransport = function (name) {
   query.transport = name;
 
   // per-transport options
-  var options = this.transportOptions[name] || {};
+  // var options = this.transportOptions[name] || {};
+  var options = {};
   // session id if we already have one
   if (this.id) query.sid = this.id;
 

@@ -2,9 +2,7 @@
 
 let s = require('socket.io-client');
 s = require('../socket.io-client-small/lib/index');
-const Emitter = require('component-emitter');
-const inherit = require('component-inherit');
-let socket = s('http://localhost:2000/test', {upgrade: false});
+let socket = s('http://localhost:2000/test?param1=123&number=3&str=abc', {upgrade: true});
 socket.on('auth', (data) => {
   console.log('auth:', data)
   socket.on('add', (data) => {

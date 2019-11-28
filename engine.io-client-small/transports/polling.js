@@ -43,7 +43,7 @@ Polling.prototype.uri = function () {
   var schema = this.secure ? 'https' : 'http';
   var port = '';
 
-  debug('uri timestampRequests: %s, timestampParam: %s', this.timestampRequests, this.timestampParam)
+  debug('uri timestampRequests: %s, timestampParam: %s, yeast: %s', this.timestampRequests, this.timestampParam, yeast())
   // cache busting is forced
   if (false !== this.timestampRequests) {
     query[this.timestampParam] = yeast();
@@ -76,8 +76,9 @@ Polling.prototype.write = function (packets) {
     self.writable = true;
     self.emit('drain');
   };
-
+  debug('parser.encodePayload start, packets: %o, supportsBinary: %s', packets, this.supportsBinary)
   parser.encodePayload(packets, this.supportsBinary, function (data) {
+    debug('parser.encodePayload over, data: %o', data)
     self.doWrite(data, callbackfn);
   });
 };

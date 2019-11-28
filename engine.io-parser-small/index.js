@@ -247,6 +247,7 @@ function setLengthHeader(message) {
  */
 
 function map(ary, each, done) {
+  debug('map')
   var result = new Array(ary.length);
   var next = after(ary.length, done);
 
