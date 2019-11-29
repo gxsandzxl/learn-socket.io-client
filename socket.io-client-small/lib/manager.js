@@ -279,7 +279,7 @@ Manager.prototype.packet = function (packet) {
     // encode, then write to engine with result
     self.encoding = true;
     this.encoder.encode(packet, function (encodedPackets) {
-      debug('encodedPackets %j', encodedPackets);
+      debug('encodedPackets %j', encodedPackets, packet.options);
       for (var i = 0; i < encodedPackets.length; i++) {
         self.engine.write(encodedPackets[i], packet.options);
       }
