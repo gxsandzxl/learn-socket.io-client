@@ -2,7 +2,7 @@
 
 let s = require('socket.io-client');
 s = require('../socket.io-client-small/lib/index');
-let socket = s('http://localhost:2000/test?param1=123&number=3&str=abc', {upgrade: true});
+let socket = s('http://localhost:2000/?param1=123&number=3&str=abc', {upgrade: true});
 socket.on('auth', (data) => {
   console.log('auth:', data)
   socket.on('add', (data) => {
@@ -23,7 +23,7 @@ socket.on('auth', (data) => {
   setTimeout(()=>{
     socket.emit('add', {})
   }, 30000)
-  
+  socket.emit('connecting', 'haahhaahah,douw omen') 
   // setTimeout(()=>{
   //   socket.close();
   // }, 120000)

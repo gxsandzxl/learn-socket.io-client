@@ -123,6 +123,8 @@ function encodeAsString(obj) {
 
 
 function decodeString(str) {
+  
+  debug('decoding packet string: %s', str);
   var i = 0;
   // look up type
   var p = {

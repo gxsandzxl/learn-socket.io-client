@@ -78,6 +78,7 @@ Manager.prototype.connect = function (fn) {
     self.readyState = 'closed';
     self.emitAll('connect_error', data);
     if (fn) {
+      debug('error fn: %o', fn);
       var err = new Error('Connection error');
       err.data = data;
       fn(err);
@@ -154,7 +155,7 @@ Manager.prototype.ondecoded = function (packet) {
 Manager.prototype.onerror = function (err) {
   debug('listen error:', err);
   // debug('error', err);
-  // this.emitAll('error', err);
+  this.emitAll('error', err);
 };
 Manager.prototype.onclose = function (reason) {
   debug('onclose');

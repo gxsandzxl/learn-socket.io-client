@@ -242,3 +242,9 @@ Socket.prototype.destroy = function () {
 
   this.io.destroy(this);
 };
+
+Socket.prototype.ondisconnect = function () {
+  debug('server disconnect (%s)', this.nsp);
+  this.destroy();
+  this.onclose('io server disconnect');
+};
